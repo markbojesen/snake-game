@@ -463,7 +463,8 @@ public class Board extends JPanel implements ActionListener {
                 rightDirection = false;
                 leftDirection = false;
             }
-            
+
+            // reset game
             if (key == KeyEvent.VK_ENTER) {
                 initGame();
             }
