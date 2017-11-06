@@ -17,11 +17,11 @@ import javax.swing.Timer;
 
 public class Board extends JPanel implements ActionListener {
 
-    private final int B_WIDTH = 500;
-    private final int B_HEIGHT = 500;
+    private final int B_WIDTH = 300;
+    private final int B_HEIGHT = 300;
     private final int DOT_SIZE = 10;
     private final int ALL_DOTS = 900;
-    private final int RAND_POS = 40; // default ?
+    private final int RAND_POS = 29; // default = 50 for 500 x 500 display
     private int DELAY = 140;
 
     private final int x[] = new int[ALL_DOTS];
@@ -51,15 +51,9 @@ public class Board extends JPanel implements ActionListener {
 
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         loadImages();
+        loadGoldenApple();
         initGame();
     }
-
-
-//    public void specialApple() {
-//        if (dots > 4) {
-//
-//        }
-//    }
 
     private void loadImages() {
 
@@ -71,10 +65,14 @@ public class Board extends JPanel implements ActionListener {
 
         ImageIcon iih = new ImageIcon("head.png");
         head = iih.getImage();
+    }
 
+    // Get this to load every 5 eaten normal apples.
+    private void loadGoldenApple() {
         ImageIcon iig = new ImageIcon("goldenApple.png");
         goldenApple = iig.getImage();
     }
+
 
     private void initGame() {
         dots = 3;
@@ -82,7 +80,6 @@ public class Board extends JPanel implements ActionListener {
             x[z] = 50 - z * 20;
             y[z] = 50;
         }
-
         locateApple();
     }
 
@@ -102,30 +99,37 @@ public class Board extends JPanel implements ActionListener {
         doDrawing(g);
     }
 
-    private void doDrawing(Graphics g) {
 
+    // draw the goldenApple on the screen when snake is == 4
+    private void doDrawing(Graphics g) {
         if (inGame) {
 
-            g.drawImage(apple, apple_x, apple_y, this);
-
-            for (int z = 0; z < dots; z++) {
-                if (z == 0) {
-                    g.drawImage(head, x[z], y[z], this);
+            int applesCollected = 0;
+            for (int i = 0; i < dots; i++) {
+                applesCollected++;
+                if (applesCollected >= 5) { // display golden apple every fifth normal apple eaten
+                    applesCollected = 0;    // reset after every 5th apple eaten and golden apple appear
+                    g.drawImage(goldenApple, apple_x, apple_y, this);
                 } else {
-                    g.drawImage(ball, x[z], y[z], this);
+                    g.drawImage(apple, apple_x, apple_y, this);
+                    for (int z = 0; z < dots; z++) {
+                        if (z == 0) {
+                            g.drawImage(head, x[z], y[z], this);
+                        } else {
+                            g.drawImage(ball, x[z], y[z], this);
+                        }
+                    }
                 }
             }
-
             Toolkit.getDefaultToolkit().sync();
 
         } else {
-
             gameOver(g);
         }
     }
 
-    private void gameOver(Graphics g) {
 
+    private void gameOver(Graphics g) {
         String msg = "Game Over";
         Font small = new Font("Helvetica", Font.BOLD, 30);
         FontMetrics metr = getFontMetrics(small);
@@ -135,17 +139,16 @@ public class Board extends JPanel implements ActionListener {
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
     }
 
-    private void checkApple() {
 
+    private void checkApple() {
         if ((x[0] == apple_x) && (y[0] == apple_y)) {
             dots++;
             locateApple();
         }
     }
 
+
     private void move() {
-
-
         for (int z = dots; z > 0; z--) {
             x[z] = x[(z - 1)];
             y[z] = y[(z - 1)];
@@ -216,13 +219,10 @@ public class Board extends JPanel implements ActionListener {
             checkCollision();
             move();
         }
-
         repaint();
     }
 
-    private class TAdapter extends KeyAdapter {
-
-        @Override
+    public class TAdapter extends KeyAdapter {
         public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
 
@@ -251,9 +251,10 @@ public class Board extends JPanel implements ActionListener {
             }
 
             // reset game
-            if (key == KeyEvent.VK_ENTER) {
+            if (!inGame && (key == KeyEvent.VK_ENTER)) {
                 initGame();
             }
+            System.out.println(e);
         }
     }
 }
