@@ -1,3 +1,4 @@
-.idea
-out
+Snake/.idea
+Snake/out/production/Snake
 .DS_Store
+Snake/Snake.iml
